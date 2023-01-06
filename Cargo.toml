@@ -1,8 +1,13 @@
 [package]
-name = "ticket-adder"
+name = "ticket_adder"
 version = "0.1.0"
 edition = "2021"
+[[bin]]
+name="prepare-commit-msg"
+path="src/prepare-commit-msg.rs"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+git2 = "0.15.0"
+regex = "1"
