@@ -14,7 +14,8 @@ This is my first time coding in Rust, so improvements are very welcome.
 ## TODO
 
 *   Methods can be broken up further to improve readability
-*   ~~Pass regex pattern from outside to avoid jumping through the build it yourself hoop~~
+*   Pass regex pattern from outside to avoid jumping through the build it yourself hoop
+*   ~~Specify types of commits that the script should run on~~
 
 ## Acknowledgements
 
