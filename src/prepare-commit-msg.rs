@@ -9,6 +9,7 @@ use regex::Regex;
 use lazy_static::lazy_static;
 
 const TICKET_PATTERN: &str = r"(CLUSTER|APM|BIZ)-[0-9]+";
+const COMMIT_MESSAGE: &str = "message";
 
 lazy_static! {
   static ref RE: Regex = Regex::new(TICKET_PATTERN).unwrap();
@@ -17,16 +18,23 @@ lazy_static! {
 fn main() {
     let commit_filename = env::args().nth(1);
 
-    // More on the contents of commit_source variable can be found here: https://git-scm.com/docs/githooks#_prepare_commit_msg
+    //More on the contents of commit_source variable can be found here: https://git-scm.com/docs/githooks#_prepare_commit_msg
     let commit_source = env::args().nth(2);
     let branch_name = get_current_branch();
     let ticket_string = get_ticket_from_branch(branch_name);
 
     match (commit_filename, commit_source, ticket_string) {
-        (Some(filename), _, Some(ticket_string)) => {
-          println!("{filename}");
-          println!("{ticket_string}");
-
+        (Some(filename), Some(commit_source), Some(ticket_string)) if commit_source == COMMIT_MESSAGE => {
+          let write_result = prepend_string(ticket_string, filename);
+            match write_result {
+                Ok(_) => {},
+                Err(e) => {
+                    eprintln!("Failed to prepend message. {}", e);
+                    process::exit(2);
+                }
+            };
+        }
+        (Some(filename), None, Some(ticket_string)) => {
             let write_result = prepend_string(ticket_string, filename);
             match write_result {
                 Ok(_) => {},
@@ -37,9 +45,7 @@ fn main() {
             };
         },
         (_, Some(_), _) => {
-            // do nothing silently. This comes up on merge commits,
-            // amendment commits, if a message was specified on the
-            // cli.
+            // Do nothing silently. Comes up with template, merge or commit (-c) commits.
         },
         (None, _, _) => {
             eprintln!("Commit file was not provided");
