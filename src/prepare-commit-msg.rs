@@ -6,12 +6,18 @@ use std::io::{Write, Read};
 use std::process;
 use std::env;
 use regex::Regex;
+use lazy_static::lazy_static;
+
+const TICKET_PATTERN: &str = r"(CLUSTER|APM|BIZ)-[0-9]+";
+
+lazy_static! {
+  static ref RE: Regex = Regex::new(TICKET_PATTERN).unwrap();
+}
 
 fn main() {
     let commit_filename = env::args().nth(1);
 
-    // the commit source will will be filled with labels like 'merge'
-    // to say how you got to this point.
+    // More on the contents of commit_source variable can be found here: https://git-scm.com/docs/githooks#_prepare_commit_msg
     let commit_source = env::args().nth(2);
     let branch_name = get_current_branch();
     let ticket_string = get_ticket_from_branch(branch_name);
@@ -47,19 +53,17 @@ fn main() {
 }
 
 fn get_ticket_from_branch(branch_name: Result<String, git2::Error>) -> Option<String>{
-    let re = Regex::new(r"(CLUSTER|APM|BIZ)-[0-9]+");
 
-    match(branch_name, re) {
-      (Ok(branch), Ok(re)) => {
-        let potential_match = re.find_iter(&branch).nth(0);
+    match branch_name {
+      Ok(branch) => {
+        let potential_match = RE.find_iter(&branch).nth(0);
 
         match potential_match {
           Some(ticket_string) => Some(ticket_string.as_str().to_string()),
           None => Some("NO-ISSUE".to_string()),
         }
       }
-      (Err(_), _) => None,
-      (Ok(_), Err(_)) => None,
+      Err(_) => None,
     }
 }
 
@@ -85,11 +89,11 @@ fn prepend_string(prefix: String, commit_filename: String) -> Result<(), std::io
     let mut read_commit_file = File::open(commit_filename.clone())?;
     let mut current_message = String::new();
     read_commit_file.read_to_string(&mut current_message)?;
+
     if !current_message.contains(&prefix) {
       let mut commit_file = File::create(commit_filename)?;
-
-    writeln!(commit_file, "{} ", prefix)?;
-    write!(commit_file, "{}", current_message)
+      writeln!(commit_file, "{} ", prefix)?;
+      write!(commit_file, "{}", current_message)
     } else {
       Ok(())
     }

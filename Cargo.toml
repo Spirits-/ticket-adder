@@ -11,3 +11,4 @@ path="src/prepare-commit-msg.rs"
 [dependencies]
 git2 = "0.15.0"
 regex = "1"
+lazy_static = "1.4.0"

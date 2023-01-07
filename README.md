@@ -4,10 +4,10 @@ and prepends it to the commit message, unless the message already contains it. T
 anything else, so use at your own risk.
 
 ## How to use
-Since the regex pattern is hardcoded, you'll have to build it yourself. Install Rust, clone the repo, change the regex
-pattern to fit your needs (the `re` variable found in the `get_ticket_from_branch` function), run `cargo build
---release`, and throw the resulting binary file found in `target/release` into your projects `.git/hooks` folder. Enjoy
-never having to remember to add the ticket to a commit ever again.
+Since the regex pattern is hardcoded, you'll have to build it yourself. Install Rust, clone/download the repo, change
+the regex pattern to fit your needs (`TICKET_PATTERN` global constant), run `cargo build --release`, and throw the
+resulting binary file found in `target/release` into your projects `.git/hooks` folder. Enjoy never having to remember
+to add the ticket to a commit ever again.
 
 This is my first time coding in Rust, so improvements are very welcome.
 
